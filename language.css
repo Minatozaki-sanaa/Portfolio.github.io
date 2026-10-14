@@ -1,0 +1,52 @@
+.header-actions { display: flex; align-items: center; gap: 13px; flex: none; }
+.language-switch {
+  display: inline-flex; align-items: center; gap: 6px; min-height: 42px;
+  padding: 5px 12px; border: 1px solid #b7aa92; border-radius: 100px;
+  background: transparent; color: var(--forest); font-size: 12px; font-weight: 800;
+  letter-spacing: .04em; transition: border-color .2s, background .2s, transform .2s;
+}
+.language-switch:hover { border-color: var(--red); background: #f2e9d8; transform: translateY(-2px); }
+.language-switch:focus-visible { outline: 3px solid var(--red); outline-offset: 3px; }
+.language-switch .language-divider { opacity: .4; }
+.language-switch[data-lang="zh"] .lang-zh,
+.language-switch[data-lang="en"] .lang-en { color: var(--red); }
+.language-switch[data-lang="zh"] .lang-en,
+.language-switch[data-lang="en"] .lang-zh { opacity: .6; }
+
+html[data-lang="en"] .hero h1 { font-size: clamp(51px, 5.7vw, 88px); letter-spacing: -.065em; white-space: normal; line-height: 1.12; }
+html[data-lang="en"] .hero h1 em { letter-spacing: -.055em; }
+html[data-lang="en"] .hero-lead { line-height: 1.65; }
+html[data-lang="en"] .about-content h2 { font-size: clamp(40px, 3.8vw, 66px); line-height: 1.2; letter-spacing: -.055em; }
+html[data-lang="en"] .section-heading h2,
+html[data-lang="en"] .toolkit-heading h2,
+html[data-lang="en"] .more-heading h2 { letter-spacing: -.055em; line-height: 1.16; }
+html[data-lang="en"] .experience-heading h2 { font-size: clamp(40px, 4.4vw, 72px); }
+html[data-lang="en"] .company-watermark { font-size: clamp(30px, 4vw, 65px); }
+html[data-lang="en"] .skill-card h3 { font-size: 25px; }
+html[data-lang="en"] .campus-feature h3 { font-size: clamp(25px, 2.1vw, 34px); line-height: 1.3; }
+html[data-lang="en"] .volunteer-card h3 { font-size: 24px; }
+html[data-lang="en"] .project-caption h3 { line-height: 1.3; }
+
+@media (max-width: 1100px) and (min-width: 801px) {
+  .site-header { padding-inline: 24px; }
+  .desktop-nav { gap: 17px; margin-left: 18px; }
+  .desktop-nav a { font-size: 12px; }
+  .header-contact { padding: 11px 15px; }
+  .header-contact span { margin-left: 6px; }
+}
+@media (max-width: 800px) {
+  .header-actions { margin-left: auto; gap: 10px; }
+  .language-switch { min-height: 40px; }
+  html[data-lang="en"] .hero h1 { font-size: clamp(49px, 8vw, 73px); }
+  html[data-lang="en"] .about-content h2 { font-size: clamp(42px, 6.5vw, 63px); }
+}
+@media (max-width: 600px) {
+  .language-switch { font-size: 11px; padding-inline: 10px; }
+  html[data-lang="en"] .hero h1 { font-size: clamp(43px, 10.3vw, 61px); margin-top: 38px; }
+  html[data-lang="en"] .hero-actions { flex-wrap: wrap; }
+  html[data-lang="en"] .about-content h2 { font-size: clamp(38px, 9vw, 54px); }
+  html[data-lang="en"] .section-heading h2,
+  html[data-lang="en"] .toolkit-heading h2,
+  html[data-lang="en"] .more-heading h2 { font-size: clamp(38px, 9vw, 55px); }
+  html[data-lang="en"] .contact h2 { font-size: clamp(43px, 10vw, 64px); }
+}

@@ -1,0 +1,83 @@
+.game-easter-egg {
+  display: inline-flex; align-items: center; gap: 9px; padding: 8px 13px;
+  border: 1px dashed #e8bda5; border-radius: 2px; color: #fff2df;
+  background: rgba(255, 247, 232, .06); font-size: 11px; font-weight: 800;
+  letter-spacing: .03em; transition: transform .2s, background .2s, border-color .2s;
+}
+.game-easter-egg:hover { transform: translateY(-3px) rotate(-1deg); background: rgba(255, 247, 232, .15); border-color: #fff2df; }
+.game-easter-egg .egg-mark { color: #edb294; font-size: 18px; line-height: 1; }
+.game-easter-egg:focus-visible, .stack-dialog button:focus-visible,
+#stack-canvas:focus-visible { outline: 3px solid #b63439; outline-offset: 3px; }
+
+.stack-dialog {
+  width: min(740px, calc(100vw - 24px)); max-height: min(94dvh, 900px);
+  padding: 0; border: 1px solid #a79579; border-radius: 4px;
+  color: var(--forest); background: #fff8e9;
+  box-shadow: 22px 24px 0 rgba(25, 43, 32, .18), 0 30px 90px rgba(12, 28, 18, .35);
+  overflow: auto;
+}
+.stack-dialog::backdrop { background: rgba(25, 43, 32, .72); backdrop-filter: blur(5px); }
+.stack-dialog-inner { padding: 27px 30px 21px; }
+.stack-close {
+  position: absolute; top: 18px; right: 20px; z-index: 2;
+  width: 38px; height: 38px; border: 1px solid #bba98e; border-radius: 50%;
+  background: #fff8e9; color: var(--forest); font-size: 28px; line-height: 1;
+}
+.stack-close:hover { color: var(--red); border-color: var(--red); }
+.stack-heading { padding-right: 55px; }
+.stack-kicker { color: var(--red); font-size: 10px; font-weight: 800; letter-spacing: .15em; }
+.stack-heading h2 { margin: 8px 0 4px; font-family: var(--serif); font-size: clamp(35px, 5vw, 54px); font-weight: 700; letter-spacing: -.065em; line-height: 1.12; }
+.stack-heading h2 span { color: var(--red); font-family: Georgia, serif; font-size: .65em; vertical-align: 10%; }
+.stack-heading p { margin: 0; color: #637063; font-size: 13px; line-height: 1.5; }
+.stack-stats { display: flex; align-items: stretch; gap: 0; margin: 18px 0 10px; border-block: 1px solid #cdbfa6; }
+.stack-stats > div { display: flex; flex-direction: column; justify-content: center; min-width: 112px; padding: 9px 20px 9px 0; border-right: 1px solid #cdbfa6; margin-right: 20px; }
+.stack-stats span { color: #777361; font-size: 10px; font-weight: 800; letter-spacing: .1em; }
+.stack-stats strong { color: var(--red); font-family: Georgia, serif; font-size: 28px; line-height: 1.15; }
+.stack-stats .stack-route-meta { min-width: 170px; border-right: 0; margin-right: 0; }
+.stack-route-meta strong { margin-top: 4px; color: var(--forest); font-family: inherit; font-size: 14px; line-height: 1.25; }
+.stack-goal { align-self: center; margin-left: auto; color: var(--forest) !important; }
+.stack-stage { position: relative; border: 1px solid #9ba995; background: #e7e8db; overflow: hidden; }
+#stack-canvas { display: block; width: 100%; height: auto; aspect-ratio: 4 / 3; touch-action: manipulation; cursor: pointer; }
+.stack-overlay { position: absolute; inset: 0; z-index: 1; display: grid; place-items: center; padding: 18px; background: rgba(36, 58, 49, .09); }
+.stack-overlay[hidden] { display: none; }
+.stack-overlay-card { width: min(350px, 92%); padding: 23px 26px 24px; text-align: center; border: 1px solid var(--forest); background: #fff9ea; box-shadow: 9px 10px 0 rgba(36, 58, 49, .18); transform: rotate(-2deg); }
+.stack-overlay-stamp { display: inline-grid; place-items: center; width: 38px; height: 38px; border: 1px solid var(--red); border-radius: 50%; color: var(--red); font-size: 26px; line-height: 1; }
+.stack-overlay-card h3 { margin: 10px 0 4px; font-family: var(--serif); font-size: 29px; line-height: 1.2; }
+.stack-overlay-card p { margin: 0 auto 17px; max-width: 275px; color: #5f6b5d; font-size: 12px; line-height: 1.6; }
+.stack-overlay-card button, #stack-drop { border: 0; background: var(--red); color: #fff8e9; border-radius: 100px; padding: 12px 20px; font-size: 12px; font-weight: 800; transition: transform .2s, background .2s; }
+.stack-overlay-card button:hover, #stack-drop:not(:disabled):hover { transform: translateY(-2px); background: #791a1e; }
+.stack-controls { display: flex; justify-content: space-between; align-items: center; gap: 15px; margin-top: 14px; }
+.stack-controls p { margin: 0; color: #687166; font-size: 12px; line-height: 1.5; }
+#stack-drop { flex: none; min-width: 126px; }
+#stack-drop:disabled { cursor: default; opacity: .45; }
+.stack-signoff { margin: 17px 0 0; color: #998a72; font-size: 9px; font-weight: 800; letter-spacing: .16em; text-align: center; }
+.visually-hidden { position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+
+@media (max-width: 900px) { .site-footer .footer-motto { display: none; } }
+@media (max-width: 600px) {
+  .site-footer .page-width { justify-content: space-between; }
+  .game-easter-egg { order: -1; width: 100%; justify-content: center; padding-block: 11px; }
+  .stack-dialog { max-height: 94dvh; }
+  .stack-dialog-inner { padding: 19px 16px 17px; }
+  .stack-close { top: 13px; right: 13px; width: 34px; height: 34px; font-size: 25px; }
+  .stack-heading { padding-right: 40px; }
+  .stack-heading h2 { font-size: 35px; }
+  .stack-heading p { font-size: 12px; }
+  .stack-stats { flex-wrap: wrap; margin-top: 13px; }
+  .stack-stats > div { min-width: 82px; padding-right: 11px; margin-right: 11px; }
+  .stack-stats span { font-size: 9px; }
+  .stack-stats strong { font-size: 24px; }
+  .stack-stats .stack-route-meta { flex: 1; min-width: 118px; padding-right: 0; margin-right: 0; }
+  .stack-route-meta strong { font-size: 12px; }
+  .stack-goal { width: 100%; padding: 5px 0 7px; border-top: 1px solid #cdbfa6; font-size: 9px !important; text-align: left; }
+  .stack-overlay-card { padding: 14px 17px 15px; }
+  .stack-overlay-stamp { width: 29px; height: 29px; font-size: 20px; }
+  .stack-overlay-card h3 { font-size: 23px; margin-top: 5px; }
+  .stack-overlay-card p { font-size: 11px; line-height: 1.4; margin-bottom: 10px; }
+  .stack-overlay-card button { padding: 9px 16px; }
+  .stack-controls { flex-direction: column; align-items: stretch; gap: 9px; margin-top: 10px; }
+  .stack-controls p { font-size: 10px; text-align: center; }
+  #stack-drop { width: 100%; padding: 10px 16px; }
+  .stack-signoff { margin-top: 12px; }
+}
+@media (prefers-reduced-motion: reduce) { .game-easter-egg, .stack-overlay-card, .stack-dialog button { transition: none; } }
