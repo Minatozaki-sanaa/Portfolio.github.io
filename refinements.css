@@ -292,3 +292,7 @@
   .hobby-list { margin-top: 18px; }
   .hobby-chip { padding: 10px 14px; }
 }
+.contact-download{display:inline-flex;align-items:center;justify-content:center;border:1px solid #fff2de;border-radius:100px;padding:18px 26px;min-width:170px;color:#fff6e6;font-size:14px;font-weight:800;transition:transform .25s,background .25s}
+.contact-download:hover{transform:translateY(-4px);background:#842025;color:#fff}
+.contact-download:focus-visible{outline:3px solid #fff2de;outline-offset:4px}
+@media(max-width:600px){.contact-download{width:min(100%,290px)}}

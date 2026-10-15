@@ -14,7 +14,7 @@ const englishText = {
   '让好想法': 'Good ideas', '走向更远的': 'go further', '市场': 'across borders',
   '你好，我是': "Hi, I'm ", '徐子涵': 'Zihan Xu',
   '。我把数据洞察、内容策略与跨团队协作串成一条线，推动海外网站与增长项目从想法走到上线。': '. I connect data insights, content strategy, and cross-functional collaboration to bring overseas website and growth initiatives from idea to launch.',
-  '看看我的项目': 'Explore my projects', '向下认识我': 'Get to know me',
+  '看看我的项目': 'Explore my projects', '向下认识我': 'Get to know me', '下载简历': 'Download CV',
   '优化后自然流量提升': 'Organic traffic growth after optimization',
   '策略与执行': 'Strategy and execution', '总要一起向前。': 'work best together.',
   '从城市规划出发，': 'From urban planning', '走向海外运营。': 'to overseas operations.',
