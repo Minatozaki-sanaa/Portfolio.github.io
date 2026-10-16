@@ -75,7 +75,7 @@
       recordsTitle: '无尽关 · 最高纪录', recordsNote: '通关五关后解锁', recordsLoading: '正在读取排行榜…',
       recordsEmpty: '还没有纪录，等你来拿第一名。', recordsUnavailable: '排行榜暂时无法读取，请稍后再试。',
       nameLabel: '留下你的名字', namePlaceholder: '昵称（最多 16 字）', submit: '保存成绩 ↗',
-      saving: '正在保存…', saved: '成绩已保存！', saveFailed: '保存失败，请稍后重试。',
+      saving: '正在保存…', saved: '成绩已保存！', saveFailed: '排行榜连接失败，成绩尚未保存。请检查网络后重试。',
       recordUnit: score => `${score} 层`
     },
     en: {
@@ -94,7 +94,7 @@
       recordsTitle: 'Endless mode · Top scores', recordsNote: 'Unlock after level 5', recordsLoading: 'Loading leaderboard…',
       recordsEmpty: 'No records yet. Be the first!', recordsUnavailable: 'Leaderboard unavailable. Please try later.',
       nameLabel: 'Enter your name', namePlaceholder: 'Nickname (up to 16 characters)', submit: 'Save score ↗',
-      saving: 'Saving…', saved: 'Score saved!', saveFailed: 'Could not save. Please try again.',
+      saving: 'Saving…', saved: 'Score saved!', saveFailed: 'Could not reach the leaderboard. Your score was not saved. Please check your connection and try again.',
       recordUnit: score => `${score} ${score === 1 ? 'parcel' : 'parcels'}`
     }
   };
@@ -215,18 +215,28 @@
     render();
   }
 
-  async function requestRunToken() {
+  async function fetchWithTimeout(url, options, milliseconds = 6000) {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 8000);
+    const timeout = setTimeout(() => controller.abort(), milliseconds);
     try {
-      const response = await fetch(`${API_BASE}/run`, { method: 'POST', signal: controller.signal });
-      if (!response.ok) throw new Error('Run could not start');
-      const payload = await response.json();
-      if (typeof payload.token !== 'string') throw new Error('Run token missing');
-      return payload.token;
+      return await fetch(url, { ...options, signal: controller.signal });
     } finally {
       clearTimeout(timeout);
     }
+  }
+
+  async function requestRunToken() {
+    let response;
+    try {
+      response = await fetchWithTimeout(`${API_BASE}/run`, { method: 'POST' }, 3500);
+      if (!response.ok) throw new Error('Run could not start');
+    } catch {
+      response = await fetchWithTimeout(`${API_BASE}/leaderboard?action=ticket`, { cache: 'no-store' });
+      if (!response.ok) throw new Error('Ticket could not be issued');
+    }
+    const payload = await response.json();
+    if (typeof payload.token !== 'string') throw new Error('Run token missing');
+    return payload.token;
   }
 
   function start() {
@@ -337,10 +347,18 @@
     try {
       const token = runToken || await runTokenPromise;
       if (!token) throw new Error('Leaderboard connection unavailable');
-      const response = await fetch(`${API_BASE}/leaderboard`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, score: level(), token })
-      });
+      let response;
+      try {
+        response = await fetchWithTimeout(`${API_BASE}/leaderboard`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, score: level(), token })
+        }, 5000);
+        if (response.status >= 500) throw new Error('Save service unavailable');
+      } catch {
+        const fallback = new URL(`${API_BASE}/leaderboard`);
+        fallback.search = new URLSearchParams({ action: 'save', name, score: String(level()), token }).toString();
+        response = await fetchWithTimeout(fallback.href, { cache: 'no-store' });
+      }
       if (!response.ok) throw new Error('Score rejected');
       const payload = await response.json();
       highlightedRecord = payload.id;
