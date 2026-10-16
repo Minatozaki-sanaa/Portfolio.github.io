@@ -71,6 +71,7 @@
       destination: name => `下一站：${name}`, routeDone: '本关路线已送达',
       endlessTitle: '无尽挑战', endlessGoal: '没有终点 · 看你能叠多高', endlessBest: '无尽关纪录',
       endlessLost: score => `无尽关叠到了 ${score} 层。留下名字，挑战排行榜！`, endlessRetry: '再来一次 ↗',
+      endlessSaved: '成绩已保存！你可以在下方排行榜查看，或再挑战一次。',
       recordsTitle: '无尽关 · 最高纪录', recordsNote: '通关五关后解锁', recordsLoading: '正在读取排行榜…',
       recordsEmpty: '还没有纪录，等你来拿第一名。', recordsUnavailable: '排行榜暂时无法读取，请稍后再试。',
       nameLabel: '留下你的名字', namePlaceholder: '昵称（最多 16 字）', submit: '保存成绩 ↗',
@@ -89,6 +90,7 @@
       destination: name => `NEXT STOP: ${name}`, routeDone: 'Route delivered',
       endlessTitle: 'ENDLESS MODE', endlessGoal: 'No finish line · stack as high as you can', endlessBest: 'ENDLESS BEST',
       endlessLost: score => `You stacked ${score} parcels in endless mode. Add your name to the leaderboard!`, endlessRetry: 'Try again ↗',
+      endlessSaved: 'Score saved! See the leaderboard below or try again.',
       recordsTitle: 'Endless mode · Top scores', recordsNote: 'Unlock after level 5', recordsLoading: 'Loading leaderboard…',
       recordsEmpty: 'No records yet. Be the first!', recordsUnavailable: 'Leaderboard unavailable. Please try later.',
       nameLabel: 'Enter your name', namePlaceholder: 'Nickname (up to 16 characters)', submit: 'Save score ↗',
@@ -173,6 +175,7 @@
     playerName.placeholder = text.namePlaceholder;
     recordForm.querySelector('button').textContent = text.submit;
     recordForm.hidden = !(isEndless() && state === 'lost' && level() > 0 && !recordSubmitted && runToken);
+    overlay.parentElement.classList.toggle('has-record-form', !recordForm.hidden);
     dropButton.disabled = state !== 'playing';
     overlay.hidden = state === 'playing';
     if (state === 'idle') {
@@ -181,7 +184,7 @@
       startButton.textContent = text.start;
     } else if (state === 'lost') {
       overlayTitle.textContent = text.lostTitle;
-      overlayCopy.textContent = isEndless() ? text.endlessLost(level()) : text.lostCopy(level());
+      overlayCopy.textContent = isEndless() ? (recordSubmitted ? text.endlessSaved : text.endlessLost(level())) : text.lostCopy(level());
       startButton.textContent = isEndless() ? text.endlessRetry : text.retry;
     } else if (state === 'cleared') {
       overlayTitle.textContent = text.clearedTitle(stageIndex + 1);
@@ -334,6 +337,9 @@
       recordsNote.textContent = locale().saved;
       announcement.textContent = locale().saved;
       recordForm.hidden = true;
+      overlay.parentElement.classList.remove('has-record-form');
+      overlayCopy.textContent = locale().endlessSaved;
+      startButton.focus({ preventScroll: true });
       await loadRecords();
     } catch {
       recordStatus.textContent = locale().saveFailed;
