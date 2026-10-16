@@ -11,10 +11,17 @@
   const overlayCopy = document.querySelector('#stack-overlay-copy');
   const scoreLabel = document.querySelector('#stack-score');
   const bestLabel = document.querySelector('#stack-best');
+  const bestTitle = document.querySelector('#stack-best-title');
   const stageLabel = document.querySelector('#stack-level');
   const goalLabel = document.querySelector('#stack-goal');
   const destinationLabel = document.querySelector('#stack-destination');
   const announcement = document.querySelector('#stack-announcement');
+  const recordsList = document.querySelector('#stack-records-list');
+  const recordsNote = document.querySelector('#stack-records-note');
+  const recordsTitle = document.querySelector('#stack-records-title');
+  const recordForm = document.querySelector('#stack-record-form');
+  const playerName = document.querySelector('#stack-player-name');
+  const recordStatus = document.querySelector('#stack-record-status');
   if (!context) {
     openButton.hidden = true;
     return;
@@ -24,6 +31,9 @@
   const HEIGHT = 480;
   const PARCEL_HEIGHT = 39;
   const BEST_KEY = 'gabby-global-stack-best-v2';
+  const ENDLESS_BEST_KEY = 'gabby-global-stack-endless-best-v1';
+  const NAME_KEY = 'gabby-global-stack-name-v1';
+  const API_BASE = 'https://gabby-stack-leaderboard-2026.orange-root-2887.chatgpt.site/api';
   const markets = {
     jpkr: { zh: '日韩', en: 'Japan & Korea', short: 'JP / KR' },
     sea: { zh: '东南亚', en: 'Southeast Asia', short: 'SEA' },
@@ -47,10 +57,11 @@
     { markets: ['jpkr', 'sea', 'southAsia', 'centralAsia', 'middleEast', 'oceania', 'eastEurope', 'westEurope', 'northAfrica', 'southAfrica', 'northAmerica', 'latinAmerica'], baseWidth: 202, speed: 310, speedStep: 19, tolerance: 4 }
   ];
   const totalGoal = stages.reduce((total, stage) => total + stage.markets.length, 0);
+  const endlessStage = { markets: stages.at(-1).markets, baseWidth: 202, speed: 330, speedStep: 11, tolerance: 4 };
   const copy = {
     zh: {
       idleTitle: '准备出发？', idleCopy: '按市场路线投放包裹。看准时机，点击画面或按空格键让它落下。',
-      start: '开始第 1 关 ↗', retry: '重试本关 ↗', next: stage => `挑战第 ${stage} 关 ↗`, restart: '重新挑战 ↗',
+      start: '开始第 1 关 ↗', retry: '重试本关 ↗', next: stage => `挑战第 ${stage} 关 ↗`, restart: '开启无尽挑战 ↗',
       lostTitle: '差一点就送到了！', lostCopy: score => `本关叠到了 ${score} 层。调整节奏，再试试看。`,
       clearedTitle: stage => `第 ${stage} 关完成！`, clearedCopy: '路线已送达。下一关的包裹更多、移动更快，落点也要更准。',
       winTitle: '环球路线完成！', winCopy: '五关全部通关，所有市场的包裹都稳稳送达。',
@@ -58,10 +69,17 @@
       missed: score => `本关结束，叠到 ${score} 层`, completed: stage => `第 ${stage} 关完成`,
       stage: stage => `第 ${stage} / ${stages.length} 关`, goal: goal => `本关目标 / ${goal} 层`,
       destination: name => `下一站：${name}`, routeDone: '本关路线已送达'
+      ,endlessTitle: '无尽挑战', endlessGoal: '没有终点 · 看你能叠多高', endlessBest: '无尽关纪录',
+      endlessLost: score => `无尽关叠到了 ${score} 层。留下名字，挑战排行榜！`, endlessRetry: '再来一次 ↗',
+      recordsTitle: '无尽关 · 最高纪录', recordsNote: '通关五关后解锁', recordsLoading: '正在读取排行榜…',
+      recordsEmpty: '还没有纪录，等你来拿第一名。', recordsUnavailable: '排行榜暂时无法读取，请稍后再试。',
+      nameLabel: '留下你的名字', namePlaceholder: '昵称（最多 16 字）', submit: '保存成绩 ↗',
+      saving: '正在保存…', saved: '成绩已保存！', saveFailed: '保存失败，请稍后重试。',
+      recordUnit: score => `${score} 层`
     },
     en: {
       idleTitle: 'Ready to ship?', idleCopy: 'Stack parcels along the market route. Tap, click, or press Space at the right moment to drop one.',
-      start: 'Start level 1 ↗', retry: 'Retry this level ↗', next: stage => `Try level ${stage} ↗`, restart: 'Play all levels again ↗',
+      start: 'Start level 1 ↗', retry: 'Retry this level ↗', next: stage => `Try level ${stage} ↗`, restart: 'Unlock endless mode ↗',
       lostTitle: 'Almost delivered!', lostCopy: score => `You stacked ${score} ${score === 1 ? 'parcel' : 'parcels'} this level. Find your rhythm and try again.`,
       clearedTitle: stage => `Level ${stage} complete!`, clearedCopy: 'Route delivered. The next level has more parcels, greater speed, and less room for error.',
       winTitle: 'Global route complete!', winCopy: 'All five levels cleared. Every market received its parcels.',
@@ -69,12 +87,25 @@
       missed: score => `Level over. You stacked ${score} ${score === 1 ? 'parcel' : 'parcels'}.`, completed: stage => `Level ${stage} complete`,
       stage: stage => `LEVEL ${stage} / ${stages.length}`, goal: goal => `THIS LEVEL / ${goal} PARCELS`,
       destination: name => `NEXT STOP: ${name}`, routeDone: 'Route delivered'
+      ,endlessTitle: 'ENDLESS MODE', endlessGoal: 'No finish line · stack as high as you can', endlessBest: 'ENDLESS BEST',
+      endlessLost: score => `You stacked ${score} parcels in endless mode. Add your name to the leaderboard!`, endlessRetry: 'Try again ↗',
+      recordsTitle: 'Endless mode · Top scores', recordsNote: 'Unlock after level 5', recordsLoading: 'Loading leaderboard…',
+      recordsEmpty: 'No records yet. Be the first!', recordsUnavailable: 'Leaderboard unavailable. Please try later.',
+      nameLabel: 'Enter your name', namePlaceholder: 'Nickname (up to 16 characters)', submit: 'Save score ↗',
+      saving: 'Saving…', saved: 'Score saved!', saveFailed: 'Could not save. Please try again.',
+      recordUnit: score => `${score} ${score === 1 ? 'parcel' : 'parcels'}`
     }
   };
   const locale = () => copy[window.siteLanguage === 'en' ? 'en' : 'zh'];
 
   let best = 0;
   try { best = Math.min(totalGoal, Math.max(0, Number(localStorage.getItem(BEST_KEY)) || 0)); } catch {}
+  let endlessBest = 0;
+  try { endlessBest = Math.max(0, Number(localStorage.getItem(ENDLESS_BEST_KEY)) || 0); } catch {}
+  try { playerName.value = localStorage.getItem(NAME_KEY) || ''; } catch {}
+  let runToken = null;
+  let recordSubmitted = false;
+  let records = [];
   let stageIndex = 0;
   let state = 'idle';
   let placed = [];
@@ -86,7 +117,8 @@
   let lastTime = 0;
 
   const level = () => placed.length - 1;
-  const stage = () => stages[stageIndex];
+  const isEndless = () => stageIndex === stages.length;
+  const stage = () => isEndless() ? endlessStage : stages[stageIndex];
   const progress = () => stages.slice(0, stageIndex).reduce((total, item) => total + item.markets.length, 0) + level();
   const baseParcel = () => ({ x: (WIDTH - stage().baseWidth) / 2, y: 418, w: stage().baseWidth, h: PARCEL_HEIGHT, label: 'GABBY' });
 
@@ -99,8 +131,8 @@
       w: previous.w,
       h: PARCEL_HEIGHT,
       direction,
-      speed: stage().speed + level() * stage().speedStep,
-      label: stage().markets[level()]
+      speed: Math.min(isEndless() ? 690 : Infinity, stage().speed + level() * stage().speedStep),
+      label: stage().markets[level() % stage().markets.length]
     };
   }
 
@@ -115,6 +147,12 @@
   }
 
   function rememberBest() {
+    if (isEndless()) {
+      if (level() <= endlessBest) return;
+      endlessBest = level();
+      try { localStorage.setItem(ENDLESS_BEST_KEY, String(endlessBest)); } catch {}
+      return;
+    }
     if (progress() <= best) return;
     best = progress();
     try { localStorage.setItem(BEST_KEY, String(best)); } catch {}
@@ -123,11 +161,18 @@
   function syncInterface() {
     const text = locale();
     scoreLabel.textContent = String(level());
-    bestLabel.textContent = String(best);
-    stageLabel.textContent = text.stage(stageIndex + 1);
-    goalLabel.textContent = text.goal(stage().markets.length);
-    const nextMarket = stage().markets[level()];
-    destinationLabel.textContent = nextMarket ? text.destination(markets[nextMarket][window.siteLanguage === 'en' ? 'en' : 'zh']) : text.routeDone;
+    bestLabel.textContent = String(isEndless() ? endlessBest : best);
+    bestTitle.textContent = isEndless() ? text.endlessBest : window.siteLanguage === 'en' ? 'BEST PROGRESS' : '最佳进度';
+    stageLabel.textContent = isEndless() ? text.endlessTitle : text.stage(stageIndex + 1);
+    goalLabel.textContent = isEndless() ? text.endlessGoal : text.goal(stage().markets.length);
+    const nextMarket = stage().markets[level() % stage().markets.length];
+    destinationLabel.textContent = !isEndless() && level() >= stage().markets.length ? text.routeDone : text.destination(markets[nextMarket][window.siteLanguage === 'en' ? 'en' : 'zh']);
+    recordsTitle.textContent = text.recordsTitle;
+    recordsNote.textContent = text.recordsNote;
+    recordForm.querySelector('label').textContent = text.nameLabel;
+    playerName.placeholder = text.namePlaceholder;
+    recordForm.querySelector('button').textContent = text.submit;
+    recordForm.hidden = !(isEndless() && state === 'lost' && level() > 0 && !recordSubmitted && runToken);
     dropButton.disabled = state !== 'playing';
     overlay.hidden = state === 'playing';
     if (state === 'idle') {
@@ -136,8 +181,8 @@
       startButton.textContent = text.start;
     } else if (state === 'lost') {
       overlayTitle.textContent = text.lostTitle;
-      overlayCopy.textContent = text.lostCopy(level());
-      startButton.textContent = text.retry;
+      overlayCopy.textContent = isEndless() ? text.endlessLost(level()) : text.lostCopy(level());
+      startButton.textContent = isEndless() ? text.endlessRetry : text.retry;
     } else if (state === 'cleared') {
       overlayTitle.textContent = text.clearedTitle(stageIndex + 1);
       overlayCopy.textContent = text.clearedCopy;
@@ -147,6 +192,7 @@
       overlayCopy.textContent = text.winCopy;
       startButton.textContent = text.restart;
     }
+    renderRecords();
   }
 
   function reset(newState = 'idle') {
@@ -158,13 +204,30 @@
     feedback = null;
     lastTime = 0;
     announcement.textContent = '';
+    recordStatus.textContent = '';
+    recordForm.hidden = true;
     syncInterface();
     render();
   }
 
-  function start() {
+  async function start() {
     if (state === 'cleared') stageIndex += 1;
-    if (state === 'won') stageIndex = 0;
+    if (state === 'won') stageIndex = stages.length;
+    if (isEndless()) {
+      startButton.disabled = true;
+      try {
+        const response = await fetch(`${API_BASE}/run`, { method: 'POST' });
+        if (!response.ok) throw new Error('Run could not start');
+        const payload = await response.json();
+        runToken = payload.token;
+      } catch {
+        overlayCopy.textContent = locale().recordsUnavailable;
+        startButton.disabled = false;
+        return;
+      }
+      startButton.disabled = false;
+    }
+    recordSubmitted = false;
     reset('playing');
     dropButton.focus({ preventScroll: true });
   }
@@ -192,7 +255,7 @@
     }
     placed.push({ x: landing.x, y: incoming.y, w: landing.w, h: PARCEL_HEIGHT, label: incoming.label });
     rememberBest();
-    if (level() >= stage().markets.length) {
+    if (!isEndless() && level() >= stage().markets.length) {
       moving = null;
       state = stageIndex === stages.length - 1 ? 'won' : 'cleared';
       if (!matchMedia('(prefers-reduced-motion: reduce)').matches) makeConfetti();
@@ -203,6 +266,76 @@
       moving = nextParcel();
       announcement.textContent = locale().placed(level());
       syncInterface();
+    }
+  }
+
+  let highlightedRecord = null;
+
+  function renderRecords(message = null) {
+    recordsList.replaceChildren();
+    if (message || !records.length) {
+      const item = document.createElement('li');
+      item.className = 'stack-records-empty';
+      item.textContent = message || locale().recordsEmpty;
+      recordsList.append(item);
+      return;
+    }
+    records.slice(0, 5).forEach((record, index) => {
+      const item = document.createElement('li');
+      if (record.id === highlightedRecord) item.className = 'is-highlight';
+      const rank = document.createElement('span');
+      rank.className = 'stack-record-rank';
+      rank.textContent = String(index + 1).padStart(2, '0');
+      const name = document.createElement('span');
+      name.className = 'stack-record-name';
+      name.textContent = record.name;
+      const score = document.createElement('strong');
+      score.className = 'stack-record-score';
+      score.textContent = locale().recordUnit(record.score);
+      item.append(rank, name, score);
+      recordsList.append(item);
+    });
+  }
+
+  async function loadRecords() {
+    renderRecords(locale().recordsLoading);
+    try {
+      const response = await fetch(`${API_BASE}/leaderboard`);
+      if (!response.ok) throw new Error('Leaderboard unavailable');
+      const payload = await response.json();
+      records = Array.isArray(payload.scores) ? payload.scores : [];
+      renderRecords();
+    } catch {
+      renderRecords(locale().recordsUnavailable);
+    }
+  }
+
+  async function saveRecord(event) {
+    event.preventDefault();
+    if (!isEndless() || state !== 'lost' || !runToken || recordSubmitted || level() < 1) return;
+    const name = playerName.value.trim().replace(/\s+/g, ' ');
+    if (!name || name.length > 16) return;
+    const submitButton = recordForm.querySelector('button');
+    submitButton.disabled = true;
+    recordStatus.textContent = locale().saving;
+    try {
+      const response = await fetch(`${API_BASE}/leaderboard`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, score: level(), token: runToken })
+      });
+      if (!response.ok) throw new Error('Score rejected');
+      const payload = await response.json();
+      highlightedRecord = payload.id;
+      recordSubmitted = true;
+      runToken = null;
+      try { localStorage.setItem(NAME_KEY, name); } catch {}
+      recordStatus.textContent = locale().saved;
+      recordForm.hidden = true;
+      await loadRecords();
+    } catch {
+      recordStatus.textContent = locale().saveFailed;
+    } finally {
+      submitButton.disabled = false;
     }
   }
 
@@ -237,7 +370,7 @@
     context.font = '700 12px Arial, sans-serif';
     context.letterSpacing = '2px';
     context.fillStyle = '#556858';
-    context.fillText(`GLOBAL DELIVERY / ${String(stageIndex + 1).padStart(2, '0')} OF ${String(stages.length).padStart(2, '0')}`, 25, 28);
+    context.fillText(isEndless() ? 'GLOBAL DELIVERY / ENDLESS MODE' : `GLOBAL DELIVERY / ${String(stageIndex + 1).padStart(2, '0')} OF ${String(stages.length).padStart(2, '0')}`, 25, 28);
     context.letterSpacing = '0px';
     context.save();
     context.translate(555, 94);
@@ -306,7 +439,9 @@
       context.strokeRect(previous.x, moving.y, previous.w, moving.h);
       context.restore();
     }
-    placed.forEach(parcel => drawParcel(parcel));
+    placed.forEach(parcel => {
+      if (parcel.y + cameraY > -PARCEL_HEIGHT && parcel.y + cameraY < HEIGHT) drawParcel(parcel);
+    });
     if (moving) drawParcel(moving, state === 'idle');
     fragments.forEach(fragment => drawParcel(fragment));
     confetti.forEach(piece => {
@@ -357,6 +492,7 @@
     document.body.classList.add('dialog-open');
     stageIndex = 0;
     reset();
+    loadRecords();
     startButton.focus({ preventScroll: true });
     frame = requestAnimationFrame(tick);
   });
@@ -369,6 +505,7 @@
     openButton.focus({ preventScroll: true });
   });
   startButton.addEventListener('click', start);
+  recordForm.addEventListener('submit', saveRecord);
   dropButton.addEventListener('click', drop);
   canvas.addEventListener('click', drop);
   document.addEventListener('keydown', event => {
