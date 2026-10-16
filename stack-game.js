@@ -106,6 +106,8 @@
   try { endlessBest = Math.max(0, Number(localStorage.getItem(ENDLESS_BEST_KEY)) || 0); } catch {}
   try { playerName.value = localStorage.getItem(NAME_KEY) || ''; } catch {}
   let runToken = null;
+  let runTokenPromise = null;
+  let runSequence = 0;
   let recordSubmitted = false;
   let records = [];
   let stageIndex = 0;
@@ -174,7 +176,7 @@
     recordForm.querySelector('label').textContent = text.nameLabel;
     playerName.placeholder = text.namePlaceholder;
     recordForm.querySelector('button').textContent = text.submit;
-    recordForm.hidden = !(isEndless() && state === 'lost' && level() > 0 && !recordSubmitted && runToken);
+    recordForm.hidden = !(isEndless() && state === 'lost' && level() > 0 && !recordSubmitted);
     overlay.parentElement.classList.toggle('has-record-form', !recordForm.hidden);
     dropButton.disabled = state !== 'playing';
     overlay.hidden = state === 'playing';
@@ -213,22 +215,32 @@
     render();
   }
 
-  async function start() {
+  async function requestRunToken() {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 8000);
+    try {
+      const response = await fetch(`${API_BASE}/run`, { method: 'POST', signal: controller.signal });
+      if (!response.ok) throw new Error('Run could not start');
+      const payload = await response.json();
+      if (typeof payload.token !== 'string') throw new Error('Run token missing');
+      return payload.token;
+    } finally {
+      clearTimeout(timeout);
+    }
+  }
+
+  function start() {
+    if (state === 'playing') return;
+    const thisRun = ++runSequence;
     if (state === 'cleared') stageIndex += 1;
     if (state === 'won') stageIndex = stages.length;
     if (isEndless()) {
-      startButton.disabled = true;
-      try {
-        const response = await fetch(`${API_BASE}/run`, { method: 'POST' });
-        if (!response.ok) throw new Error('Run could not start');
-        const payload = await response.json();
-        runToken = payload.token;
-      } catch {
-        overlayCopy.textContent = locale().recordsUnavailable;
-        startButton.disabled = false;
-        return;
-      }
-      startButton.disabled = false;
+      runToken = null;
+      runTokenPromise = requestRunToken().then(token => {
+        if (thisRun !== runSequence) return null;
+        runToken = token;
+        return token;
+      }).catch(() => null);
     }
     recordSubmitted = false;
     reset('playing');
@@ -316,16 +328,18 @@
 
   async function saveRecord(event) {
     event.preventDefault();
-    if (!isEndless() || state !== 'lost' || !runToken || recordSubmitted || level() < 1) return;
+    if (!isEndless() || state !== 'lost' || recordSubmitted || level() < 1) return;
     const name = playerName.value.trim().replace(/\s+/g, ' ');
     if (!name || name.length > 16) return;
     const submitButton = recordForm.querySelector('button');
     submitButton.disabled = true;
     recordStatus.textContent = locale().saving;
     try {
+      const token = runToken || await runTokenPromise;
+      if (!token) throw new Error('Leaderboard connection unavailable');
       const response = await fetch(`${API_BASE}/leaderboard`, {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, score: level(), token: runToken })
+        body: JSON.stringify({ name, score: level(), token })
       });
       if (!response.ok) throw new Error('Score rejected');
       const payload = await response.json();
@@ -508,6 +522,9 @@
   closeButton.addEventListener('click', () => dialog.close());
   dialog.addEventListener('click', event => { if (event.target === dialog) dialog.close(); });
   dialog.addEventListener('close', () => {
+    ++runSequence;
+    runToken = null;
+    runTokenPromise = null;
     cancelAnimationFrame(frame);
     lastTime = 0;
     document.body.classList.remove('dialog-open');
