@@ -6,7 +6,7 @@
 }
 .game-easter-egg:hover { transform: translateY(-3px) rotate(-1deg); background: rgba(255, 247, 232, .15); border-color: #fff2df; }
 .game-easter-egg .egg-mark { color: #edb294; font-size: 18px; line-height: 1; }
-.game-easter-egg:focus-visible, .stack-dialog button:focus-visible,
+.game-easter-egg:focus-visible, .stack-dialog button:focus-visible, .stack-dialog input:focus-visible,
 #stack-canvas:focus-visible { outline: 3px solid #b63439; outline-offset: 3px; }
 
 .stack-dialog {

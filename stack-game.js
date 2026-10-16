@@ -68,8 +68,8 @@
       perfect: '精准投放 ✳', placed: score => `成功叠到第 ${score} 层`,
       missed: score => `本关结束，叠到 ${score} 层`, completed: stage => `第 ${stage} 关完成`,
       stage: stage => `第 ${stage} / ${stages.length} 关`, goal: goal => `本关目标 / ${goal} 层`,
-      destination: name => `下一站：${name}`, routeDone: '本关路线已送达'
-      ,endlessTitle: '无尽挑战', endlessGoal: '没有终点 · 看你能叠多高', endlessBest: '无尽关纪录',
+      destination: name => `下一站：${name}`, routeDone: '本关路线已送达',
+      endlessTitle: '无尽挑战', endlessGoal: '没有终点 · 看你能叠多高', endlessBest: '无尽关纪录',
       endlessLost: score => `无尽关叠到了 ${score} 层。留下名字，挑战排行榜！`, endlessRetry: '再来一次 ↗',
       recordsTitle: '无尽关 · 最高纪录', recordsNote: '通关五关后解锁', recordsLoading: '正在读取排行榜…',
       recordsEmpty: '还没有纪录，等你来拿第一名。', recordsUnavailable: '排行榜暂时无法读取，请稍后再试。',
@@ -86,8 +86,8 @@
       perfect: 'Perfect drop ✳', placed: score => `Stacked parcel ${score}`,
       missed: score => `Level over. You stacked ${score} ${score === 1 ? 'parcel' : 'parcels'}.`, completed: stage => `Level ${stage} complete`,
       stage: stage => `LEVEL ${stage} / ${stages.length}`, goal: goal => `THIS LEVEL / ${goal} PARCELS`,
-      destination: name => `NEXT STOP: ${name}`, routeDone: 'Route delivered'
-      ,endlessTitle: 'ENDLESS MODE', endlessGoal: 'No finish line · stack as high as you can', endlessBest: 'ENDLESS BEST',
+      destination: name => `NEXT STOP: ${name}`, routeDone: 'Route delivered',
+      endlessTitle: 'ENDLESS MODE', endlessGoal: 'No finish line · stack as high as you can', endlessBest: 'ENDLESS BEST',
       endlessLost: score => `You stacked ${score} parcels in endless mode. Add your name to the leaderboard!`, endlessRetry: 'Try again ↗',
       recordsTitle: 'Endless mode · Top scores', recordsNote: 'Unlock after level 5', recordsLoading: 'Loading leaderboard…',
       recordsEmpty: 'No records yet. Be the first!', recordsUnavailable: 'Leaderboard unavailable. Please try later.',
@@ -243,7 +243,8 @@
       state = 'lost';
       announcement.textContent = locale().missed(level());
       syncInterface();
-      startButton.focus({ preventScroll: true });
+      if (isEndless() && level() > 0) playerName.focus();
+      else startButton.focus({ preventScroll: true });
       return;
     }
     if (!landing.perfect) {
@@ -330,6 +331,8 @@
       runToken = null;
       try { localStorage.setItem(NAME_KEY, name); } catch {}
       recordStatus.textContent = locale().saved;
+      recordsNote.textContent = locale().saved;
+      announcement.textContent = locale().saved;
       recordForm.hidden = true;
       await loadRecords();
     } catch {
