@@ -81,7 +81,24 @@
 .about-aside { max-width: none; }
 .about-editorial-image { height: 264px; margin-bottom: 30px; object-position: center 58%; }
 .about-aside .aside-index { display: block; margin: 0 0 15px; color: var(--red); font-size: 10px; font-weight: 800; letter-spacing: .12em; }
-.education-item { border-top: 1px solid #cbbda6; padding: 20px 0 23px; }
+.education-item { position: relative; border-top: 1px solid #cbbda6; padding: 20px 0 23px; }
+.education-item h3, .education-item > p { padding-right: 96px; }
+.education-seal {
+  position: absolute; top: 27px; right: 5px; width: 82px; height: 82px;
+  background-color: var(--forest); opacity: .58;
+  -webkit-mask-image: var(--seal-image); mask-image: var(--seal-image);
+  -webkit-mask-position: center; mask-position: center;
+  -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+  -webkit-mask-size: contain; mask-size: contain;
+  transform: rotate(-4deg);
+  transition: background-color .35s ease, opacity .35s ease, transform .35s ease;
+}
+.education-seal-szu { --seal-image: url('images/szu-seal.png'); }
+.education-seal-njtech { --seal-image: url('images/njtech-seal.png'); }
+.education-item:hover .education-seal, .education-item:active .education-seal {
+  background-color: var(--red); opacity: 1; transform: rotate(4deg) scale(1.08);
+}
+@media (prefers-reduced-motion: reduce) { .education-seal { transition: none; } }
 .education-item > span { font-size: 11px; color: #778073; }
 .education-item h3 { font-family: var(--serif); color: var(--forest); font-size: 26px; line-height: 1.3; margin: 9px 0 4px; }
 .education-item p { margin: 0 0 11px; font-size: 13px; font-weight: 600; line-height: 1.55; }
@@ -269,6 +286,8 @@
   .about-aside { display: block; }
   .about-editorial-image { height: 235px; }
   .education-item { padding-block: 15px; }
+  .education-item h3, .education-item > p { padding-right: 76px; }
+  .education-seal { top: 22px; right: 2px; width: 67px; height: 67px; }
   .education-intent { padding-top: 17px; }
   .company-watermark { font-size: 36px; top: 12px; color: rgba(247, 239, 219, .075); }
   .experience-points { gap: 14px; margin: 20px 0; }
